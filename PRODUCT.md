@@ -1,4 +1,4 @@
-# Product
+# IT 故障排查與回報中心
 
 <!-- impeccable:product-schema 1 -->
 
@@ -8,35 +8,22 @@ web
 
 ## Users
 
-Employees using an internal self-service help desk to troubleshoot workplace IT or office issues with AI, submit repair requests, and check request status.
+員工可自行排查工作場所的 IT 與辦公設施問題，或直接進入「報修單」提交問題並追蹤進度。
 
 ## Product Purpose
 
-Provide an internal service desk entry point where employees can ask the AI assistant about common workplace IT and office problems and create, search, or manage repair tickets. The confirmed primary audience is employees using self-service. Employees should begin with AI troubleshooting and submit a ticket when the issue remains unresolved.
+預設頁面為「AI 問答」。員工可用自己的話描述問題，也可從快速索引選題、修改後送出。AI 以知識文件協助排查；需要後續處理時，員工可從回答直接開啟已帶入原問題的報修表單。
 
 ## Operating Context
 
-The product has two frontend areas: an AI assistant for knowledge questions and ticket status queries, and a ticket list for creating, searching, editing, and deleting tickets. The AI uses the knowledge documents and can query ticket status through tools. Ticket data is stored by the separate ticket service and MySQL. The frontend is a React and Vite web app, with desktop as the primary viewport and mobile as a responsive secondary viewport per the redesign request. Chat exchanges need only be available in the current page session; they do not need to persist between visits.
+React 前端有「AI 問答」與「報修單」兩個頁面。問答由 `helpdesk-ai` 檢索文件並呼叫 Gemini，需要查詢或異動報修資料時使用 MCP 工具。報修單頁透過 REST 操作同一個報修服務，資料存於 MySQL。現有服務未實作使用者身分驗證及逐筆報修授權。[架構與啟動方式](README.md)
 
 ## Capabilities and Constraints
 
-- Creating a ticket requires a requester name and issue description; the service returns its identifier, category, status, and creation time.
-- Ticket lists can be searched by ticket identifier, requester name, and issue description, and filtered by status.
-- Tickets can be edited or deleted. Deletion is irreversible and currently requires confirmation.
-- AI answers can include knowledge source filenames and tool usage metadata. The chat page keeps its conversation only for the current page session.
-- Preserve the knowledge source filenames shown with AI answers. Displaying which tools were used is not required.
-- Ticket status is read from the ticket service; the interface must not imply a status that was not returned by the service.
-- The redesign should preserve existing product behavior and API contracts while organizing the interface around employee self-service tasks.
-- Employees should start with AI troubleshooting; a ticket is the next step when the issue is unresolved.
-- Chat history does not need to persist between visits; source filenames should remain available with the corresponding answer, while tool usage records need not be shown or retained.
-
-## Evidence on Hand
-
-The repository contains the React frontend, API clients, backend services, README architecture and workflow documentation, and the knowledge documents under `helpdesk-ai/src/main/resources/knowledge`. There are no confirmed customer testimonials, service-level commitments, or usage metrics; do not invent them.
+- **問答與來源**　同一頁可接續提問。切換至報修單或重新整理後，前端會建立新對話。每個回答顯示來源檔名或無來源提示，工具使用紀錄由 API 提供。[對話元件](frontend/src/features/chat/ChatPage.tsx)
+- **建立報修單**　表單須填報修人、從九種類別選一項，並提供問題描述。送出成功後，服務產生編號與建立時間，初始狀態為「待處理」。在對話中明確要求建單時，AI 也可透過工具建立。[報修工具](mcp-ticket-server/src/main/java/com/example/ticketserver/mcp/TicketStatusTools.java)
+- **查找與管理**　清單可依編號、報修人或問題描述搜尋，並按實際存在的狀態篩選。編輯可變更報修人、問題描述與狀態；狀態支援自訂文字。清單以台北時間顯示建立時間。刪除前會要求確認。[報修單元件](frontend/src/features/tickets/TicketsPage.tsx)
 
 ## Product Principles
 
-- Let employees reach a useful next step quickly.
-- Make AI answers and their references distinguishable.
-- Show ticket identifiers and service-returned status clearly.
-- Keep ticket submission concise and explain what information is needed.
+讓員工能在回答旁核對文件來源，從未解決的問題接續建單，並使用報修服務回傳的編號與狀態追蹤進度。

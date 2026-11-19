@@ -1,25 +1,42 @@
 # Office Service Desk RAG
 
+「IT 故障排查與回報中心」提供員工自助服務：先透過 AI 問答查詢知識文件、排查問題；若仍需協助，可接續建立報修單並查看處理狀態。前端使用 React + Vite，後端由 AI/RAG 服務與獨立的報修服務組成。
+
+## 快速開始（Docker Compose）
+
+需要 Docker Engine 與 Docker Compose，以及可用的 Gemini API 金鑰。首次啟動 AI 服務會下載約 1.3 GB 的 ONNX 嵌入模型，請預留網路、磁碟與記憶體資源。
+
+在專案根目錄執行：
+
+~~~powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+New-Item -ItemType Directory -Force .secrets | Out-Null
+if (-not (Test-Path .secrets/db_password.txt)) { Copy-Item .secrets.example/db_password.txt .secrets/db_password.txt }
+if (-not (Test-Path .secrets/mysql_root_password.txt)) { Copy-Item .secrets.example/mysql_root_password.txt .secrets/mysql_root_password.txt }
+# 在 .env 填入 SPRING_AI_GOOGLE_GENAI_API_KEY，並將兩個 .secrets/*.txt 改成不同的密碼
+docker compose --env-file .env up --build -d
+docker compose --env-file .env ps
+~~~
+
+服務健康後，開啟 <http://localhost:5173>。前端經 Nginx 將 `/api/chat` 與 `/api/tickets` 轉送至各自的後端。其他啟動與連接埠細節見下方「環境變數與啟動」及「Docker Compose 一鍵啟動」。
+
 ## 架構
 
 ~~~text
-Postman
-   | POST /api/chat
-   v
-helpdesk-ai (Spring Boot, port 8080)
-   |-- Gemini API: gemini-3.8-flash
-   |-- Spring AI Transformers: BAAI/bge-large-zh-v1.5 on ONNX Runtime
-   |-- TokenTextSplitter（300-token chunk，保留中文句末標點）
-   |-- SimpleVectorStore（程序記憶體；啟動時從知識文件目錄載入並重建索引）
-   |-- MCP Client（Streamable HTTP）
-   v
-mcp-ticket-server (Spring Boot, port 8081)
-   |-- REST CRUD /api/tickets
-   |-- MCP: getTicketStatus, createTicket, updateTicketStatus, updateTicketIssue, updateTicketRequesterName
-   |-- MySQL via Spring Data JPA; Flyway manages the schema
+瀏覽器 → 前端（React + Vite；Compose 使用 Nginx，主機 port 5173）
+   |-- /api/chat    → helpdesk-ai（Spring Boot, port 8080）
+   |                   |-- Gemini API: gemini-3.8-flash
+   |                   |-- Spring AI Transformers: BAAI/bge-large-zh-v1.5 on ONNX Runtime
+   |                   |-- TokenTextSplitter → SimpleVectorStore（啟動時重建記憶體索引）
+   |                   `-- MCP Client（Streamable HTTP）--+
+   |-- /api/tickets ---------------------------------------+--→ mcp-ticket-server（Spring Boot, port 8081）
+                                                          |    |-- REST CRUD /api/tickets
+                                                          |    |-- MCP 報修單工具
+                                                          |    `-- Spring Data JPA + Flyway → MySQL
+Postman 可直接呼叫兩個後端的 REST API
 ~~~
 
-兩個應用各自啟動。AI 應用負責檢索知識文件及產生回答；報修單資料由 MCP Server 存取 MySQL。報修狀態只依 MCP 回傳，不以靜態文件推測。
+前端的報修單頁也會直接透過 `/api/tickets` 呼叫 MCP Server 的 REST API。AI 應用負責檢索知識文件及產生回答；報修單資料由 MCP Server 存取 MySQL。報修狀態只依 MCP 回傳，不以靜態文件推測。本機開發時三個應用分別啟動；Docker Compose 另啟動 MySQL 與 Nginx。
 
 ## Maven 模組與依賴
 
@@ -63,27 +80,25 @@ mcp-ticket-server/scripts/
 
 ## 環境變數與啟動
 
-報修資料由獨立 MySQL Server 儲存；MySQL 自己管理資料目錄，專案不存放資料庫實體檔。先啟動本機 MySQL 服務，預設連接埠為 `3306`。若是全新資料庫，使用 MySQL Workbench 或 MySQL 用戶端，以管理者帳號執行 `mcp-ticket-server/scripts/create-ticket-database.sql` 一次建立 `ticket_db`。資料庫建立後，Flyway 會在 MCP Server 啟動時自動套用 `src/main/resources/db/migration` 內尚未執行的 migration；Hibernate 只驗證結構，不自行修改資料表。
+以下為不使用 Docker 的本機開發流程，需要 Java 21、Maven、Node.js/npm、MySQL，以及可用的 Gemini API 金鑰。報修資料由獨立 MySQL Server 儲存；MySQL 自己管理資料目錄，專案不存放資料庫實體檔。先啟動本機 MySQL 服務，預設連接埠為 `3306`。若是全新資料庫，使用 MySQL Workbench 或 MySQL 用戶端，以管理者帳號執行 `mcp-ticket-server/scripts/create-ticket-database.sql` 一次建立 `ticket_db`。資料庫建立後，Flyway 會在 MCP Server 啟動時自動套用 `src/main/resources/db/migration` 內尚未執行的 migration；Hibernate 只驗證結構，不自行修改資料表。
 
-啟動 MCP Server。預設連線網址為 `jdbc:mysql://localhost:3306/ticket_db`，連線設定位於 `mcp-ticket-server/src/main/resources/application.properties`。若本機 MySQL 使用不同網址或帳密，先建立未納入版控的本機覆寫檔：
+先從範例建立根目錄 `.env`，填入 Gemini API 金鑰及本機 MySQL 密碼。MCP Server 預設以 `root` 連線 `jdbc:mysql://localhost:3306/ticket_db`；若使用不同帳號或連線網址，在 `.env` 增加 `TICKET_DB_USERNAME` 或 `TICKET_DB_URL`。兩個 Spring Boot 應用都會從專案根目錄載入 `.env`。接著啟動 MCP Server：
 
 ~~~powershell
-if (-not (Test-Path mcp-ticket-server/application-local.properties)) { Copy-Item mcp-ticket-server/application-local.properties.example mcp-ticket-server/application-local.properties }
-# 編輯 application-local.properties 設定本機 MySQL 連線
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+# 編輯 .env，設定 SPRING_AI_GOOGLE_GENAI_API_KEY 與 TICKET_DB_PASSWORD
 mvn -pl mcp-ticket-server spring-boot:run
 ~~~
 
-MCP Server 首次啟動時會依序套用 Flyway migration 建立報修單資料表並新增報修人名稱與建立時間欄位。既有報修單名稱回填為「未提供」，既有建立時間於 V4 migration 回填；新建立時間由伺服器產生。`created_at` 使用 MySQL `DATETIME(6)` 儲存台北本地時間。往後的結構變更請新增下一版 migration，不要修改已存在的 migration。
+MCP Server 首次啟動時會依序套用 Flyway migration 建立報修單資料表，並新增報修人名稱、類別與建立時間欄位。既有報修單名稱回填為「未提供」，既有建立時間於 V4 migration 回填；新建立時間由伺服器產生。`created_at` 使用 MySQL `DATETIME(6)` 儲存台北本地時間。往後的結構變更請新增下一版 migration，不要修改已存在的 migration。
 
 另開終端機啟動 AI 應用：
 
 ~~~powershell
-if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-# 編輯 .env 設定 Gemini API 金鑰與 RAG 參數
 mvn -pl helpdesk-ai spring-boot:run
 ~~~
 
-若 8081 已被其他程式占用，可改成其他可用 port，例如 `MCP_SERVER_PORT=8083` 與 `TICKET_SERVER_PORT=8083`。
+本機若改用 8083，在根目錄 `.env` 同時設定 `MCP_SERVER_PORT=8083`（報修服務監聽）與 `TICKET_SERVER_PORT=8083`（AI 的 MCP 連線）。使用 Vite 開發前端時，也要將 [Vite 設定](frontend/vite.config.ts) 的 `/api/tickets` 代理目標改為 8083。
 
 知識 TXT 預設放在 `helpdesk-ai/src/main/resources/knowledge`。以 Maven 在本機啟動時，AI 應用從 classpath 載入；以 Docker Compose 啟動時，Compose 將此主機資料夾唯讀掛載至容器的 `/app/knowledge`，AI 應用從掛載路徑載入。正式部署可在 `.env` 將 `KNOWLEDGE_DIR` 設為 Docker 主機上的知識文件資料夾路徑。文件依網路、電腦、周邊、帳號、辦公軟體、會議設備及辦公設施等問題拆分，提供一般員工可執行的安全排查方式；報修單狀態一律透過 MCP 查詢。
 
@@ -97,11 +112,11 @@ docker compose --env-file .env restart helpdesk-ai
 
 首次啟動 AI 應用時，Spring AI 會自動從 Hugging Face 取得 ONNX 模型與 tokenizer，並快取至暫存目錄；不需手動安裝 Ollama 或執行模型下載指令。模型檔約 1.3 GB，首次啟動需要網路連線與足夠的磁碟及記憶體。
 
-`.env.example` 提供 Gemini API 金鑰及可調整的 RAG 參數；專案根目錄存在 `.env` 時，AI 應用會自動載入。資料庫連線資訊放在 MCP Server 的 properties 檔，不放在 `.env`。
+`.env.example` 目前提供 `SPRING_AI_GOOGLE_GENAI_API_KEY` 與本機用的 `TICKET_DB_PASSWORD`。需要調整模型或 RAG 行為時，可自行在 `.env` 增加 `GOOGLE_GENAI_CHAT_MODEL`、`EMBEDDING_MODEL`、`RAG_TOP_K`、`RAG_SIMILARITY_THRESHOLD`、`RAG_CHUNK_SIZE` 等變數；預設值可查閱 `helpdesk-ai/src/main/resources/application.properties`。本機資料庫連線預設值及覆寫名稱則見 `mcp-ticket-server/src/main/resources/application.properties`。`.env` 不納入版控。
 
 ## Docker Compose 一鍵啟動
 
-Docker Compose 會啟動 MySQL、MCP 報修服務、AI/RAG 服務與 Nginx 前端。複製環境變數範例和本機 secret 範例，並填入 Gemini API 金鑰及兩組資料庫密碼：
+Docker Compose 會啟動 MySQL、MCP 報修服務、AI/RAG 服務與 Nginx 前端。複製環境變數範例和本機 secret 範例，並填入 Gemini API 金鑰及兩組資料庫密碼。Compose 的資料庫密碼取自 `.secrets`；`.env.example` 裡的 `TICKET_DB_PASSWORD` 僅供不使用 Docker 的本機 MySQL 流程，可在 Compose 專用的 `.env` 刪除該行：
 
 ~~~powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
@@ -180,11 +195,13 @@ MCP Server 透過 Streamable HTTP 提供以下工具；每次讀取或更新都�
 
 ## 獨立前端
 
+前端預設開啟「AI 問答」，提供常見問題快速索引與連續對話。點選索引會將範例帶入輸入框，可修改後再送出。每則回答顯示來源檔名或無來源提示。若排查後仍需協助，可從一般排查回答下方按「建立報修單」，帶入剛才的問題描述；仍需填入報修人名稱並選擇類別才會送出。前端判定為報修進度查詢時會省略建單按鈕。切換頁面或重新整理會開始新對話，聊天紀錄不會保存在瀏覽器。報修單頁可依編號、報修人或問題描述搜尋，以狀態篩選，並建立、編輯、刪除報修單；刪除前會要求確認。
+
 先依上方步驟啟動 `mcp-ticket-server`（預設 `8081`）與 `helpdesk-ai`（預設 `8080`），再另開終端機：
 
 ~~~powershell
 cd frontend
-npm install
+npm ci
 npm run dev
 ~~~
 
@@ -197,9 +214,9 @@ cd frontend
 npm run build
 ~~~
 
-獨立部署前端時，可在建置前設定 `VITE_HELPDESK_API_BASE_URL` 與 `VITE_TICKETS_API_BASE_URL`（例如設為各自後端的來源網址）；留空時使用相對路徑。跨來源部署需由後端或反向代理提供正確的 CORS 設定，尤其 ticket server 目前沒有明確的 CORS 設定。
+獨立部署前端時，可參考 `frontend/.env.example`，在建置前設定 `VITE_HELPDESK_API_BASE_URL` 與 `VITE_TICKETS_API_BASE_URL`（例如設為各自後端的來源網址）；留空時使用相對路徑。跨來源部署需由後端或反向代理提供正確的 CORS 設定，尤其 ticket server 目前沒有明確的 CORS 設定。
 
-## Postman
+## 聊天 REST API
 
 送出 POST http://localhost:8080/api/chat，標頭為 Content-Type: application/json。`conversationId` 是選填欄位；相同 ID 可沿用最近 12 輪對話（記憶體最多保留 500 個對話），不傳時每次請求仍維持舊版獨立提問行為。聊天頁會在目前頁面使用隨機 ID，重新整理或離開頁面即開始新對話。
 
@@ -233,13 +250,15 @@ npm run build
 - {"question":"我的 VPN 無法連線，而且 IT-001 報修單目前處理到哪？"}
 - {"question":"幫我查 IT-999"}
 
-## RAG 驗收測試
+## 測試與 RAG 驗收
 
 `helpdesk-ai/src/test/resources/rag-acceptance-cases.json` 保存 20 道驗收題、預期文件、預期工具與檢查重點。AI 服務與 MCP 報修服務啟動後，在專案根目錄執行：
 
 ~~~powershell
 node helpdesk-ai/scripts/run-rag-acceptance.mjs
 ~~~
+
+若只需驗證特定案例，可執行 `node helpdesk-ai/scripts/run-rag-acceptance.mjs --ids A01,A02`。AI 使用其他連接埠時，可用 `--url` 指定服務根網址。後端單元測試可在專案根目錄執行 `mvn test`。
 
 測試紀錄會寫到 `helpdesk-ai/target/rag-acceptance-results-<timestamp>.json`，包含題目、預期來源、實際檢索片段與分數、回答、引用來源、工具名稱及四項評分欄位。檢索結果會自動收集；回答正確性、證據使用、知識邊界與工具判斷需人工依測試表評分。D20 暫列 `NOT_TESTED`，因目前 API 尚無使用者身份和工單授權功能。
 
