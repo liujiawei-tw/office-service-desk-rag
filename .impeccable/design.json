@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-19T05:30:00Z",
+  "title": "Design System: 青禾科技 IT 服務台",
+  "extensions": {
+    "colorMeta": {
+      "teal": { "role": "primary", "displayName": "Deep Guide Teal", "canonical": "#164e63", "tonalRamp": ["#08212a", "#0c303d", "#104052", "#164e63", "#286a80", "#5592a6", "#91bdc7", "#d4e7e8"] },
+      "teal-dark": { "role": "primary", "displayName": "Deep Teal Shade", "canonical": "#103e50", "tonalRamp": ["#061a22", "#0b2a36", "#103e50", "#1c5669", "#397789", "#6aa1ae", "#a7c7cc", "#dcebed"] },
+      "lime": { "role": "primary", "displayName": "Clear Guide Lime", "canonical": "#d8f05b", "tonalRamp": ["#20240d", "#343b14", "#56631e", "#82952e", "#a9c43d", "#c3df4c", "#d8f05b", "#f1f9c9"] },
+      "paper": { "role": "neutral", "displayName": "Soft Paper", "canonical": "#f6f8f4", "tonalRamp": ["#20221f", "#383b36", "#555a52", "#777d73", "#9ba298", "#bdc4ba", "#dce2d8", "#f6f8f4"] },
+      "mist": { "role": "neutral", "displayName": "Pale Mist", "canonical": "#e9f1ee", "tonalRamp": ["#1c2220", "#333b38", "#4e5a55", "#6d7b75", "#90a099", "#b1c1ba", "#ccdad4", "#e9f1ee"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#16232a", "tonalRamp": ["#071014", "#101a20", "#16232a", "#2f414a", "#52656d", "#7a8c93", "#adb9bc", "#e1e7e5"] },
+      "muted": { "role": "neutral", "displayName": "Muted Teal Gray", "canonical": "#475e65", "tonalRamp": ["#172023", "#2b383c", "#475e65", "#647a80", "#87999d", "#aebbbc", "#cdd6d4", "#e8eeeb"] },
+      "surface": { "role": "neutral", "displayName": "White Surface", "canonical": "#ffffff", "tonalRamp": ["#1c1c1c", "#333333", "#4d4d4d", "#696969", "#858585", "#a3a3a3", "#c2c2c2", "#ffffff"] },
+      "surface-soft": { "role": "neutral", "displayName": "Soft Surface", "canonical": "#eef4f1", "tonalRamp": ["#1d211f", "#333a37", "#505b56", "#71807a", "#93a39c", "#b3c3bc", "#d0ddd7", "#eef4f1"] },
+      "line": { "role": "neutral", "displayName": "Fine Divider", "canonical": "#d6e2dd", "tonalRamp": ["#1b211e", "#303a35", "#4d5a54", "#6e7d76", "#93a39b", "#b4c3bc", "#d6e2dd", "#f3f7f5"] },
+      "line-strong": { "role": "neutral", "displayName": "Strong Divider", "canonical": "#aabdb5", "tonalRamp": ["#1a211e", "#303a35", "#4e5c55", "#708078", "#93a59c", "#aabdb5", "#c7d5cf", "#e8eeeb"] },
+      "accent-soft": { "role": "primary", "displayName": "Soft Accent", "canonical": "#e2efec", "tonalRamp": ["#1a211f", "#303a37", "#4c5d58", "#6e827c", "#91a9a2", "#b3cbc4", "#cde1db", "#e2efec"] },
+      "accent-ink": { "role": "primary", "displayName": "Accent Ink", "canonical": "#123e4e", "tonalRamp": ["#06191f", "#0b2934", "#123e4e", "#24596a", "#477889", "#789da7", "#afc6ca", "#e0ebea"] },
+      "warning": { "role": "tertiary", "displayName": "Caution Ochre", "canonical": "#795600", "tonalRamp": ["#201800", "#382800", "#563d00", "#795600", "#a37b24", "#c5a45c", "#dfca97", "#f5ebd2"] },
+      "warning-soft": { "role": "tertiary", "displayName": "Caution Wash", "canonical": "#fff5d6", "tonalRamp": ["#201d14", "#383428", "#59533f", "#80775a", "#a79c77", "#c9bd94", "#e7dcb6", "#fff5d6"] },
+      "danger": { "role": "tertiary", "displayName": "Alert Red", "canonical": "#a42d2b", "tonalRamp": ["#260b0a", "#401311", "#651c1a", "#8a2623", "#a42d2b", "#c45c58", "#df9994", "#f3d8d5"] },
+      "danger-soft": { "role": "tertiary", "displayName": "Alert Wash", "canonical": "#fff0ee", "tonalRamp": ["#241b1a", "#40312f", "#634d4b", "#8a6f6c", "#b09491", "#d4b8b5", "#ead4d1", "#fff0ee"] },
+      "success": { "role": "tertiary", "displayName": "Resolved Green", "canonical": "#176747", "tonalRamp": ["#071a12", "#0d3021", "#124a33", "#176747", "#36845f", "#68a887", "#a2cbb3", "#dceee3"] },
+      "success-soft": { "role": "tertiary", "displayName": "Resolved Wash", "canonical": "#e3f3e9", "tonalRamp": ["#19201b", "#303a33", "#4d5d52", "#708577", "#95ae9b", "#b7d0bd", "#cee4d4", "#e3f3e9"] },
+      "white": { "role": "neutral", "displayName": "White", "canonical": "#ffffff", "tonalRamp": ["#1c1c1c", "#333333", "#4d4d4d", "#696969", "#858585", "#a3a3a3", "#c2c2c2", "#ffffff"] }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "Body", "purpose": "Traditional Chinese interface copy, questions, instructions, and ticket content." },
+      "headline": { "displayName": "Headline", "purpose": "Primary page heading." },
+      "title": { "displayName": "Title", "purpose": "Section headings." },
+      "label": { "displayName": "Label", "purpose": "Field labels, status badges, and metadata." }
+    },
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 2px 7px rgb(22 47 53 / 5%)", "purpose": "Small ambient separation." },
+      { "name": "shadow-card", "value": "0 7px 22px rgb(22 47 53 / 6%)", "purpose": "Quiet card lift." },
+      { "name": "shadow-pop", "value": "0 16px 36px rgb(22 47 53 / 15%)", "purpose": "Foreground pop layer." }
+    ],
+    "motion": [
+      { "name": "control-transition", "value": "130ms ease", "purpose": "Button and field state changes." },
+      { "name": "navigation-transition", "value": "150ms ease", "purpose": "Navigation color and background changes." },
+      { "name": "page-reveal", "value": "240ms cubic-bezier(.2, .7, .2, 1)", "purpose": "Subtle page content reveal." },
+      { "name": "reduced-motion", "value": "prefers-reduced-motion: reduce", "purpose": "Shorten transitions and disable page reveal for reduced-motion preference." }
+    ],
+    "breakpoints": [
+      { "name": "phone-narrow", "value": "420px" },
+      { "name": "phone", "value": "560px" },
+      { "name": "mobile", "value": "720px" },
+      { "name": "guide-stack", "value": "820px" },
+      { "name": "guide-medium", "value": "1050px" },
+      { "name": "ticket-stack", "value": "1120px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High priority action such as asking AI or submitting a ticket.",
+      "html": "<button class=\"ds-button-primary\" type=\"button\">詢問 AI</button>",
+      "css": ".ds-button-primary { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:9px 15px; border:1px solid transparent; border-radius:10px; color:#fff; background:#164e63; font:650 15px/1.2 'Noto Sans TC',sans-serif; cursor:pointer; transition:background-color 130ms ease,box-shadow 130ms ease; } .ds-button-primary:hover { background:#103e50; } .ds-button-primary:focus-visible { outline:none; box-shadow:0 0 0 3px rgb(216 240 91 / 68%); } .ds-button-primary:active { background:#103e50; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A quieter action such as opening the ticket handoff or cancelling an edit.",
+      "html": "<button class=\"ds-button-secondary\" type=\"button\">建立報修單</button>",
+      "css": ".ds-button-secondary { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:9px 15px; border:1px solid #d6e2dd; border-radius:10px; color:#16232a; background:#fff; font:650 15px/1.2 'Noto Sans TC',sans-serif; cursor:pointer; transition:background-color 130ms ease,border-color 130ms ease,box-shadow 130ms ease; } .ds-button-secondary:hover { border-color:#aabdb5; background:#eef4f1; } .ds-button-secondary:focus-visible { outline:none; box-shadow:0 0 0 3px rgb(216 240 91 / 68%); } .ds-button-secondary:active { background:#e9f1ee; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled white field for employee questions and ticket search or details.",
+      "html": "<label class=\"ds-field\"><span>問題內容</span><input class=\"ds-input\" placeholder=\"描述遇到的狀況\"></label>",
+      "css": ".ds-field { display:grid; gap:7px; color:#16232a; font:650 14px/1.4 'Noto Sans TC',sans-serif; } .ds-input { width:100%; min-height:44px; padding:10px 12px; border:1px solid #aabdb5; border-radius:8px; color:#16232a; background:#fff; font:450 15px/1.5 'Noto Sans TC',sans-serif; transition:border-color 130ms ease,box-shadow 130ms ease; } .ds-input::placeholder { color:#52686c; opacity:1; } .ds-input:hover { border-color:#475e65; } .ds-input:focus-visible { outline:none; border-color:#164e63; box-shadow:0 0 0 3px rgb(216 240 91 / 68%); }"
+    },
+    {
+      "name": "Navigation Item",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "Active destination in the service rail or compact mobile navigation.",
+      "html": "<button class=\"ds-nav-item\" type=\"button\"><strong>AI 問答</strong><small>從問題開始排查</small></button>",
+      "css": ".ds-nav-item { display:grid; gap:2px; min-height:52px; padding:10px 12px; border:1px solid transparent; border-radius:9px; color:#16232a; background:#d8f05b; text-align:left; font:750 14px/1.4 'Noto Sans TC',sans-serif; cursor:pointer; transition:background-color 150ms ease,box-shadow 150ms ease; } .ds-nav-item small { font-size:11px; font-weight:450; } .ds-nav-item:hover { background:#c9e448; } .ds-nav-item:focus-visible { outline:none; box-shadow:0 0 0 3px rgb(216 240 91 / 68%); } .ds-nav-item:active { background:#bdd83d; }"
+    },
+    {
+      "name": "Status Tag",
+      "kind": "chip",
+      "refersTo": "tag-status",
+      "description": "Compact semantic state label for a ticket.",
+      "html": "<span class=\"ds-status-tag\">已完成</span>",
+      "css": ".ds-status-tag { display:inline-flex; min-height:27px; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; color:#18583a; background:#e3f3e9; font:650 12px/1.3 'Noto Sans TC',sans-serif; white-space:nowrap; } .ds-status-tag::before { width:6px; height:6px; border-radius:50%; background:currentColor; content:''; }"
+    },
+    {
+      "name": "Guide Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White bordered surface for question entry, answers, and ticket lists.",
+      "html": "<article class=\"ds-card\"><strong>排查建議</strong><p>依照步驟逐一檢查。</p></article>",
+      "css": ".ds-card { padding:24px; border:1px solid #d6e2dd; border-radius:16px; color:#16232a; background:#fff; font:400 15px/1.6 'Noto Sans TC',sans-serif; } .ds-card strong { font-size:18px; } .ds-card p { margin:8px 0 0; }"
+    },
+    {
+      "name": "Guide to Ticket Handoff",
+      "kind": "custom",
+      "refersTo": "handoff",
+      "description": "Keeps the unresolved issue and next ticket action adjacent to the answer and source filenames.",
+      "html": "<section class=\"ds-handoff\"><div><strong>問題還沒排除？</strong><span>建立報修單，並帶入你剛才描述的問題。</span></div><button class=\"ds-handoff-action\" type=\"button\">建立報修單</button></section>",
+      "css": ".ds-handoff { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:17px; padding:13px 14px; border-radius:9px; color:#16232a; background:#f4f8e7; font-family:'Noto Sans TC',sans-serif; } .ds-handoff div { display:grid; gap:2px; } .ds-handoff strong { font-size:14px; } .ds-handoff span { color:#475e65; font-size:12px; line-height:1.4; } .ds-handoff-action { min-height:42px; padding:9px 15px; border:1px solid #d6e2dd; border-radius:10px; color:#16232a; background:#fff; font:650 14px/1.2 'Noto Sans TC',sans-serif; cursor:pointer; transition:background-color 130ms ease,box-shadow 130ms ease; } .ds-handoff-action:hover { background:#eef4f1; } .ds-handoff-action:focus-visible { outline:none; box-shadow:0 0 0 3px rgb(216 240 91 / 68%); } .ds-handoff-action:active { background:#e9f1ee; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Employee Quick Guide",
+    "overview": "This is a practical guide for turning a vague office or IT problem into a useful next step. Deep teal anchors the service identity, yellow-green marks the current route and key actions, and pale paper surfaces keep instructions easy to scan. Traditional Chinese uses the system sans stack already present in the app; no custom font assets are assumed.\n\nThe experience starts with AI question entry, a compact topic index, and readable troubleshooting responses. Answers retain their source filenames, and an unresolved issue can move into the ticket form with its description carried forward. The chat exists only in the current page session. Ticket search, status filtering, create, edit, and delete remain part of the same service desk. Desktop is the primary layout; mobile reflows the same tasks into a narrow column and bottom navigation. The responsive layout is specified from CSS; mobile has not been visually verified.",
+    "keyCharacteristics": [
+      "Teal service identity with a bright lime active-state accent.",
+      "Familiar controls, restrained borders, and clear labels.",
+      "Troubleshooting answer, source filename, and ticket handoff form one path."
+    ],
+    "rules": [
+      { "name": "The Teal-and-Lime Wayfinding Rule", "body": "Reserve lime for active, selected, or immediately actionable elements; use teal for stable service identity and primary action.", "section": "colors" }
+    ],
+    "dos": [
+      "Do keep the AI question, ordered guidance, exact source filenames, and ticket handoff legible as one employee path.",
+      "Do use the established teal and lime roles for primary action and current navigation.",
+      "Do preserve clear field labels, visible keyboard focus, and the responsive stacking described in Layout.",
+      "Do keep the current-page chat scope clear; conversation history does not persist across pages."
+    ],
+    "donts": [
+      "Don't present tool-usage records as part of the employee-facing answer.",
+      "Don't imply guaranteed answers, response times, live support health, or user metrics.",
+      "Don't drop or paraphrase source filenames.",
+      "Don't introduce decorative display fonts or font assets absent from the implementation."
+    ]
+  }
+}

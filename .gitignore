@@ -1,0 +1,13 @@
+target/
+.idea/
+.vscode/
+*.iml
+.env
+.secrets/
+**/application-local.properties
+.cache/
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+/frontend/.env.*
+!/frontend/.env.example

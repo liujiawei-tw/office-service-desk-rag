@@ -1,0 +1,27 @@
+ARG APP_MODULE
+
+FROM maven:3.10-eclipse-temurin-21-alpine AS build
+ARG APP_MODULE
+WORKDIR /workspace
+
+COPY pom.xml ./
+COPY helpdesk-ai/pom.xml helpdesk-ai/pom.xml
+COPY mcp-ticket-server/pom.xml mcp-ticket-server/pom.xml
+RUN mvn -B -pl "$APP_MODULE" -am dependency:go-offline
+
+COPY helpdesk-ai/src helpdesk-ai/src
+COPY mcp-ticket-server/src mcp-ticket-server/src
+RUN mvn -B -pl "$APP_MODULE" -am package \
+    && cp "$APP_MODULE/target/$APP_MODULE-0.1.0-SNAPSHOT.jar" /workspace/app.jar
+
+FROM eclipse-temurin:21-jre-noble AS runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /app /tmp/spring-ai-bge-large-zh-v1.5 \
+    && chown -R 10001:10001 /app /tmp/spring-ai-bge-large-zh-v1.5
+
+WORKDIR /app
+COPY --from=build --chown=10001:10001 /workspace/app.jar /app/app.jar
+USER 10001:10001
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

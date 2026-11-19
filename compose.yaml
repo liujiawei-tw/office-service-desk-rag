@@ -1,0 +1,112 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ticket_db
+      MYSQL_USER: ticket_app
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      TZ: Asia/Taipei
+    ports:
+      - "127.0.0.1:13306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    secrets:
+      - db_password
+      - mysql_root_password
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping --host=127.0.0.1 --user=root --password="$$(cat /run/secrets/mysql_root_password)" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  mcp-ticket-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        APP_MODULE: mcp-ticket-server
+    restart: unless-stopped
+    environment:
+      MCP_SERVER_PORT: "8081"
+      TICKET_DB_URL: "jdbc:mysql://mysql:3306/ticket_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Taipei"
+      TICKET_DB_USERNAME: ticket_app
+    ports:
+      - "127.0.0.1:${MCP_HOST_PORT:-8081}:8081"
+    secrets:
+      - db_password
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8081/api/tickets >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  helpdesk-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        APP_MODULE: helpdesk-ai
+    restart: unless-stopped
+    environment:
+      HELPDESK_PORT: "8080"
+      SPRING_AI_GOOGLE_GENAI_API_KEY: ${SPRING_AI_GOOGLE_GENAI_API_KEY:?Set SPRING_AI_GOOGLE_GENAI_API_KEY in .env}
+      GOOGLE_GENAI_CHAT_MODEL: ${GOOGLE_GENAI_CHAT_MODEL:-gemini-3.8-flash}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-large-zh-v1.5}
+      HELPDESK_CHAT_TEMPERATURE: ${HELPDESK_CHAT_TEMPERATURE:-0.3}
+      RAG_CHUNK_SIZE: ${RAG_CHUNK_SIZE:-300}
+      RAG_MIN_CHUNK_SIZE_CHARS: ${RAG_MIN_CHUNK_SIZE_CHARS:-100}
+      RAG_MIN_CHUNK_LENGTH_TO_EMBED: ${RAG_MIN_CHUNK_LENGTH_TO_EMBED:-5}
+      RAG_KEEP_SEPARATOR: ${RAG_KEEP_SEPARATOR:-true}
+      RAG_TOP_K: ${RAG_TOP_K:-4}
+      RAG_SIMILARITY_THRESHOLD: ${RAG_SIMILARITY_THRESHOLD:-0.3}
+      RAG_EMBEDDING_MAX_LENGTH: ${RAG_EMBEDDING_MAX_LENGTH:-512}
+      HELPDESK_KNOWLEDGE_PATTERN: file:/app/knowledge/*.txt
+      TICKET_SERVER_HOST: mcp-ticket-server
+      TICKET_SERVER_PORT: "8081"
+    ports:
+      - "127.0.0.1:${HELPDESK_HOST_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8080/api/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 5m
+    volumes:
+      - type: bind
+        source: ${KNOWLEDGE_DIR:-./helpdesk-ai/src/main/resources/knowledge}
+        target: /app/knowledge
+        read_only: true
+      - embedding_cache:/tmp/spring-ai-bge-large-zh-v1.5
+    depends_on:
+      mcp-ticket-server:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_HOST_PORT:-5173}:80"
+    depends_on:
+      helpdesk-ai:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  embedding_cache:
+
+secrets:
+  db_password:
+    file: ./.secrets/db_password.txt
+  mysql_root_password:
+    file: ./.secrets/mysql_root_password.txt

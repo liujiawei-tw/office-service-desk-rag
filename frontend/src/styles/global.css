@@ -1,0 +1,47 @@
+* { box-sizing: border-box; }
+html { min-width: 320px; min-height: 100%; background: var(--canvas); }
+body { margin: 0; min-width: 320px; min-height: 100vh; color: var(--ink); background: var(--canvas); font-size: 15px; line-height: 1.65; caret-color: var(--accent); }
+button, input, textarea, select { font: inherit; }
+button, a { touch-action: manipulation; }
+button { color: inherit; -webkit-tap-highlight-color: transparent; }
+::selection { color: #203128; background: #c6d9c8; }
+*:focus-visible { outline: 3px solid #789980; outline-offset: 3px; }
+a { text-underline-offset: .2em; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: #e8eee8; }
+::-webkit-scrollbar-thumb { border: 2px solid #e8eee8; background: #9eafa0; }
+::-webkit-scrollbar-thumb:hover { background: #627d6c; }
+.button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 8px; padding: 10px 17px; border: 1px solid transparent; border-radius: 3px; font-weight: 700; line-height: 1.2; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease; }
+.button:hover:not(:disabled) { transform: translateY(-1px); }
+.button:disabled { cursor: not-allowed; opacity: .58; }
+.button--primary { color: white; background: #627d6c; }
+.button--primary:hover:not(:disabled) { background: #4f6958; }
+.button--secondary { color: var(--ink); border-color: #b9b5ad; background: transparent; }
+.button--secondary:hover:not(:disabled) { border-color: #789380; background: #eaf0e9; }
+.button--danger { color: #9b2d28; border-color: #dbaba5; background: transparent; }
+.button--danger:hover:not(:disabled) { background: #f9e7e3; }
+.button--small { min-height: 38px; padding: 8px 12px; font-size: 13px; }
+.button--icon { width: 44px; padding: 0; }
+.field { display: grid; gap: 7px; color: var(--ink); font-size: 14px; font-weight: 700; }
+.field__hint { color: var(--muted); font-size: 12px; font-weight: 450; }
+.input, .textarea, .select { width: 100%; min-height: 46px; padding: 11px 13px; border: 1px solid #aaa69e; border-radius: 3px; color: var(--ink); background: #fffefa; font-weight: 450; }
+.textarea { min-height: 120px; resize: vertical; line-height: 1.65; }
+.input::placeholder, .textarea::placeholder { color: #5b5b63; opacity: 1; }
+.input:focus-visible, .textarea:focus-visible, .select:focus-visible { border-color: #29324f; }
+.notice { padding: 13px 16px; border: 1px solid var(--line); color: var(--ink); background: #e8e5de; }
+.notice--error { color: #7e2925; border-color: #dcaaa5; background: var(--danger-soft); }
+.notice--success { color: #20573f; border-color: #a9c9af; background: var(--success-soft); }
+.status-badge { display: inline-flex; min-height: 29px; align-items: center; gap: 7px; padding: 4px 10px; border-radius: 2px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-badge::before { width: 7px; height: 7px; background: currentColor; content: ""; }
+.status-badge--neutral { color: #424b45; background: #e8ebe7; }
+.status-badge--waiting { color: #674606; background: #f8edcf; }
+.status-badge--working { color: #355b6c; background: #e4eef0; }
+.status-badge--done { color: #20573f; background: #e3efe5; }
+.status-badge--urgent { color: #8e2824; background: #f9e7e3; }
+.loading-state, .empty-state { display: grid; justify-items: center; gap: 10px; padding: 48px 20px; color: var(--muted); text-align: center; }
+.loading-state__spinner { width: 24px; height: 24px; border: 2px solid #c4d1c5; border-top-color: #627d6c; animation: spin .8s linear infinite; }
+.empty-state__title { margin: 0; color: var(--ink); font-size: 17px; font-weight: 800; }
+.empty-state__copy { max-width: 42ch; margin: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+@media (max-width: 680px) { body { font-size: 16px; } .button, .button--small { min-height: 44px; } }

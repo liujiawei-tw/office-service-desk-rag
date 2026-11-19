@@ -1,0 +1,28 @@
+.app-shell { display: grid; grid-template-columns: 224px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); width: 100%; height: 100vh; height: 100dvh; overflow: hidden; }
+.app-shell:has(.main-content--assistant) { height: var(--chat-viewport, 100dvh); }
+.skip-link { position: fixed; z-index: 60; top: 8px; left: 8px; padding: 10px 14px; transform: translateY(-180%); color: white; background: #182538; }
+.skip-link:focus { transform: translateY(0); }
+.topbar { display: flex; flex-direction: column; gap: 32px; padding: 22px 12px; background: #182538; color: white; }
+.brand { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.brand-mark { flex-shrink: 0; }
+.brand-copy { font-size: .94rem; line-height: 1.35; }
+.primary-navigation { display: flex; flex-direction: column; gap: 6px; }
+.navigation-item { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 8px; cursor: pointer; color: #c9d6e7; background: transparent; }
+.navigation-item:hover { background: #23364d; }
+.navigation-item--active { background: #304866; color: white; }
+.navigation-item--active:hover { background: #365272; }
+.main-content { min-width: 0; min-height: 0; overflow: auto; padding: 24px clamp(18px, 3vw, 48px); background: var(--canvas); }
+.main-content--assistant { overflow: hidden; padding: 0; }
+.content-wrap { width: 100%; height: 100%; }
+.page-content--assistant { height: 100%; min-height: 0; }
+.page-footer { display: none; }
+@media (max-width: 760px) {
+  .app-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .topbar { flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; padding: max(4px, env(safe-area-inset-top)) 10px 4px; }
+  .brand-mark { width: 24px; height: 24px; }
+  .brand-copy { font-size: .82rem; }
+  .primary-navigation { flex-direction: row; gap: 2px; }
+  .navigation-item { padding: 5px 8px; font-size: .82rem; white-space: nowrap; }
+  .navigation-item > svg { display: none; }
+  .main-content--tickets { padding: 12px; }
+}

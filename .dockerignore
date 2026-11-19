@@ -1,0 +1,11 @@
+.git
+.idea
+.vscode
+.env*
+**/.env*
+**/application-local.properties
+**/.secrets
+**/target
+**/node_modules
+**/dist
+**/.DS_Store
