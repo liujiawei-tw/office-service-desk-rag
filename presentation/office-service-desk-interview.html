@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eff4ef">
+  <title>Office Service Desk RAG｜專案展示</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* === FRONTEND PALETTE AND FIXED STAGE === */
+    :root {
+      --stage-bg: #dfe9df;
+      --slide-bg: #eff4ef;
+      --surface: #fbfdf9;
+      --surface-soft: #eaf0e9;
+      --mist: #e3ebe3;
+      --ink: #27362f;
+      --muted: #53635a;
+      --accent: #627d6c;
+      --accent-dark: #4f6958;
+      --accent-soft: #e3ece3;
+      --line: #d5e0d5;
+      --line-strong: #aab9ab;
+      --success: #27654b;
+      --font: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    /* Fixed 16:9 stage from the frontend-slides viewport model. */
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg); }
+    .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg); }
+    .deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg); }
+    .slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg); }
+    .slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+    img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+    .deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+    @media print {
+      html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+      .deck-viewport { position: static; overflow: visible; background: #fff; }
+      .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+      .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+      .slide:last-child { break-after: auto; page-break-after: auto; }
+      .deck-controls { display: none !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .2s !important; }
+    }
+
+    /* === SHARED SLIDE TYPOGRAPHY AND CHROME === */
+    body { font-family: var(--font); color: var(--ink); }
+    button { font: inherit; }
+    .slide::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(#8ba38e 1px, transparent 1px); background-size: 24px 24px; opacity: .095; }
+    .slide::after { content: ""; position: absolute; left: 72px; right: 72px; bottom: 76px; height: 1px; background: var(--line-strong); opacity: .7; }
+    .slide-inner { position: relative; z-index: 1; height: 100%; padding: 66px 76px 96px; }
+    .topline, .footline { display: flex; align-items: center; justify-content: space-between; }
+    .topline { height: 42px; color: var(--accent-dark); font-size: 18px; font-weight: 800; letter-spacing: .08em; }
+    .project-mark { display: flex; align-items: center; gap: 13px; }
+    .mark-icon { width: 29px; height: 29px; border: 3px solid var(--accent); border-radius: 8px 8px 8px 2px; position: relative; }
+    .mark-icon::after { content: ""; position: absolute; left: 7px; top: 7px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+    .footline { position: absolute; left: 76px; right: 76px; bottom: 33px; color: var(--muted); font-size: 16px; font-weight: 600; letter-spacing: .02em; }
+    .slide-no { color: var(--accent-dark); font-weight: 900; }
+    .eyebrow { color: var(--accent-dark); font-size: 23px; font-weight: 800; letter-spacing: .12em; }
+    .slide-title { margin: 16px 0 0; font-size: 66px; line-height: 1.16; letter-spacing: -.035em; font-weight: 900; }
+    .slide-deck { margin: 19px 0 0; color: var(--muted); font-size: 27px; line-height: 1.55; }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .58s ease, transform .58s ease; }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .slide.visible .reveal:nth-child(2) { transition-delay: .09s; }
+    .slide.visible .reveal:nth-child(3) { transition-delay: .18s; }
+    .slide.visible .reveal:nth-child(4) { transition-delay: .27s; }
+
+    /* === SLIDE 1: COVER === */
+    .cover { background: linear-gradient(125deg, #eff4ef 0%, #eff4ef 57%, #e4ece4 100%); }
+    .cover-inner { display: grid; grid-template-columns: 920px 1fr; gap: 88px; align-items: center; padding-bottom: 100px; }
+    .cover-copy { align-self: center; }
+    .cover .eyebrow { margin-bottom: 30px; }
+    .cover h1 { margin: 0; font-size: 92px; line-height: 1.17; font-weight: 900; letter-spacing: -.06em; }
+    .cover h1 span { display: block; color: var(--accent-dark); }
+    .cover-lead { width: 800px; margin: 39px 0 0; color: var(--muted); font-size: 35px; line-height: 1.5; font-weight: 500; }
+    .cover-tags { display: flex; gap: 14px; margin-top: 48px; }
+    .cover-tags span { padding: 12px 20px; border: 1px solid #b7cbb9; border-radius: 5px; color: var(--accent-dark); background: #e6efe6; font-size: 19px; font-weight: 800; letter-spacing: .05em; }
+    .mockup { position: relative; height: 700px; padding: 28px; border: 1px solid #c9d8cb; border-radius: 24px; background: var(--surface); box-shadow: 0 32px 72px #405b4523; transform: rotate(2deg); }
+    .mockup::before { content: ""; position: absolute; left: -33px; right: 34px; top: 34px; bottom: -33px; z-index: -1; border: 2px solid #abc0ad; border-radius: 24px; opacity: .6; }
+    .mock-head { display: flex; gap: 10px; align-items: center; height: 56px; padding: 0 20px; border-radius: 10px; background: var(--surface-soft); color: var(--ink); font-size: 20px; font-weight: 800; }
+    .mock-head .round { width: 13px; height: 13px; border-radius: 50%; background: #9db8a1; }
+    .mock-head .round:nth-child(2) { background: #bfd0bf; }
+    .mock-head .round:nth-child(3) { background: #d4dfd3; margin-right: 16px; }
+    .mock-label { margin: 29px 0 17px; color: var(--accent-dark); font-size: 16px; font-weight: 900; letter-spacing: .12em; }
+    .bubble { padding: 22px 27px; border-radius: 15px; font-size: 23px; line-height: 1.48; }
+    .bubble.user { width: 77%; margin-left: auto; background: #e4eee4; color: var(--ink); }
+    .bubble.ai { width: 89%; margin-top: 20px; border: 1px solid var(--line); background: white; }
+    .bubble.ai strong { display: block; margin-bottom: 8px; color: var(--accent-dark); font-size: 18px; }
+    .mock-source { margin-top: 11px; color: var(--muted); font-size: 15px; }
+    .mock-action { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 19px 23px; border-left: 5px solid var(--accent); background: #eaf0e9; font-size: 21px; font-weight: 700; }
+    .mock-action b { padding: 10px 16px; background: var(--accent); color: white; font-size: 17px; border-radius: 4px; }
+
+    /* === SLIDE 2: NEED AND SOLUTION === */
+    .problem-layout { display: grid; grid-template-columns: 720px 1fr; gap: 40px; margin-top: 44px; height: 600px; }
+    .problem-panel { position: relative; padding: 48px 50px; border-radius: 18px; color: #f9fcf8; background: #405849; overflow: hidden; }
+    .problem-panel::after { content: ""; position: absolute; right: -120px; bottom: -190px; width: 520px; height: 520px; border: 1px solid #b5cdb9; border-radius: 50%; opacity: .2; box-shadow: 0 0 0 80px #8cad9320, 0 0 0 160px #8cad9318; }
+    .panel-small { display: block; color: #bfd4c3; font-size: 20px; font-weight: 900; letter-spacing: .14em; }
+    .problem-quote { position: relative; z-index: 1; margin: 25px 0 47px; font-size: 47px; line-height: 1.35; font-weight: 900; }
+    .problem-list { position: relative; z-index: 1; display: grid; gap: 16px; }
+    .problem-list div { display: flex; align-items: center; gap: 15px; padding: 19px 23px; border: 1px solid #779482; border-radius: 10px; background: #ffffff12; font-size: 24px; font-weight: 600; }
+    .problem-list b { color: #bfd4c3; font-size: 18px; }
+    .solution-panel { padding: 42px 50px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: 0 12px 30px #3045350e; }
+    .solution-list { display: grid; gap: 18px; margin-top: 25px; }
+    .solution-step { display: grid; grid-template-columns: 64px 1fr; gap: 18px; padding: 17px 0 23px; border-bottom: 1px solid var(--line); }
+    .solution-step:last-child { border-bottom: 0; }
+    .solution-num { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 12px; background: var(--accent-soft); color: var(--accent-dark); font-size: 22px; font-weight: 900; }
+    .solution-step h3 { margin: 0; font-size: 29px; line-height: 1.35; }
+    .solution-step p { margin: 6px 0 0; color: var(--muted); font-size: 22px; line-height: 1.45; }
+    .solution-outcome { margin-top: 20px; padding: 20px 24px; border-radius: 8px; background: #e3efe5; color: #20573f; font-size: 22px; font-weight: 800; }
+
+    /* === SLIDE 3: USER JOURNEY AND ENDPOINTS === */
+    .flow-wrap { position: relative; margin-top: 26px; height: 245px; padding: 22px 34px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .flow-heading { color: var(--accent-dark); font-size: 19px; font-weight: 900; letter-spacing: .12em; }
+    .flow-row { display: flex; align-items: center; gap: 14px; margin-top: 21px; }
+    .flow-node { min-height: 105px; display: flex; flex-direction: column; justify-content: center; flex: 1; padding: 15px 20px; border-radius: 10px; background: #eaf0e9; text-align: center; }
+    .flow-node:first-child { background: #405849; color: white; }
+    .flow-node strong { font-size: 25px; }
+    .flow-node span { margin-top: 4px; color: var(--muted); font-size: 17px; }
+    .flow-node:first-child span { color: #d2e0d4; }
+    .flow-arrow { width: 37px; flex: none; color: var(--accent); font-size: 37px; font-weight: 700; text-align: center; }
+    .flow-branch { margin-top: 11px; text-align: center; color: var(--accent-dark); font-size: 20px; font-weight: 800; }
+    .api-wrap { display: grid; grid-template-columns: 580px 1fr; gap: 29px; margin-top: 20px; height: 380px; }
+    .api-card { padding: 25px 29px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .api-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .api-head h3 { margin: 0; font-size: 24px; }
+    .api-head span { color: var(--muted); font-size: 16px; font-weight: 700; }
+    .api-row { display: grid; grid-template-columns: 105px 1fr; align-items: start; gap: 17px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+    .api-row:last-child { border-bottom: 0; }
+    .method { display: inline-grid; place-items: center; min-width: 80px; height: 34px; border-radius: 4px; color: white; background: var(--accent); font: 800 16px/1 var(--font); letter-spacing: .04em; }
+    .method.get { background: #567783; }
+    .method.put { background: #8c7243; }
+    .method.delete { background: #9b5a50; }
+    .endpoint { color: var(--ink); font: 700 21px/1.4 Consolas, "Courier New", monospace; white-space: nowrap; }
+    .endpoint small { display: block; color: var(--muted); font: 500 18px/1.4 var(--font); white-space: normal; }
+    .api-card.chat .api-row { margin-top: 14px; }
+    .api-note { margin-top: 29px; padding: 24px; border-radius: 9px; background: #eaf0e9; color: var(--accent-dark); font-size: 21px; line-height: 1.5; font-weight: 700; }
+    .api-note strong { display: block; margin-bottom: 6px; font-size: 19px; }
+    .api-card.tickets .api-row { grid-template-columns: 105px 1fr; padding: 10px 0; }
+    .api-card.tickets .endpoint { font-size: 19px; }
+    .api-card.tickets .endpoint small { font-size: 17px; }
+
+    /* === SLIDE 4: RAG AND MCP IN THIS PROJECT === */
+    .architecture-intro { margin: 14px 0 0; color: var(--muted); font-size: 25px; line-height: 1.5; }
+    .architecture-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 28px; height: 535px; }
+    .architecture-card { padding: 27px 32px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: 0 12px 30px #3045350e; }
+    .architecture-card.mcp { background: #405849; border-color: #405849; color: #f9fcf8; }
+    .architecture-head { display: flex; gap: 22px; align-items: flex-start; padding-bottom: 17px; border-bottom: 1px solid var(--line); }
+    .mcp .architecture-head { border-color: #7f9b85; }
+    .architecture-acronym { display: grid; place-items: center; flex: none; width: 92px; height: 62px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-dark); font: 900 25px/1 var(--font); letter-spacing: .06em; }
+    .mcp .architecture-acronym { background: #dcebdc; color: #405849; }
+    .architecture-head h3 { margin: -3px 0 4px; font-size: 29px; line-height: 1.3; }
+    .architecture-head p { margin: 0; color: var(--muted); font-size: 20px; }
+    .mcp .architecture-head p { color: #d2e0d4; }
+    .architecture-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 17px; }
+    .architecture-step { min-height: 130px; padding: 15px 18px; border: 1px solid #d4e1d5; border-radius: 9px; background: #f4f8f3; }
+    .mcp .architecture-step { border-color: #779482; background: #ffffff12; }
+    .architecture-step b { display: block; margin-bottom: 7px; color: var(--accent-dark); font-size: 17px; letter-spacing: .08em; }
+    .mcp .architecture-step b { color: #c5ddc9; }
+    .architecture-step strong { display: block; font-size: 22px; line-height: 1.3; }
+    .architecture-step span { display: block; margin-top: 6px; color: var(--muted); font-size: 17px; line-height: 1.35; }
+    .mcp .architecture-step span { color: #d2e0d4; }
+    .architecture-result { margin-top: 14px; padding: 11px 16px; border-left: 5px solid var(--accent); background: var(--accent-soft); color: var(--accent-dark); font-size: 19px; font-weight: 800; }
+    .mcp .architecture-result { border-left-color: #bfd4c3; background: #ffffff20; color: #f4faf4; }
+    .mcp-route { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 17px; padding: 10px 14px; border: 1px solid #779482; border-radius: 8px; background: #ffffff12; }
+    .mcp-route span { color: #f4faf4; font-size: 17px; font-weight: 800; }
+    .mcp-route i { color: #c5ddc9; font-size: 22px; font-style: normal; }
+    .mcp-tool-heading { margin-top: 17px; color: #c5ddc9; font-size: 17px; font-weight: 900; letter-spacing: .08em; }
+    .mcp-tools { margin-top: 6px; }
+    .mcp-tool { display: grid; grid-template-columns: 360px 1fr; align-items: center; min-height: 45px; gap: 14px; border-bottom: 1px solid #779482; }
+    .mcp-tool:last-child { border-bottom: 0; }
+    .mcp-tool code { color: #f4faf4; font: 700 17px/1.3 Consolas, "Courier New", monospace; white-space: nowrap; }
+    .mcp-tool span { color: #d2e0d4; font-size: 18px; font-weight: 600; }
+    .mcp-tool-note { margin-top: 10px; color: #d2e0d4; font-size: 17px; line-height: 1.35; }
+    .architecture-rule { display: flex; align-items: center; gap: 15px; margin-top: 19px; padding: 13px 21px; border: 1px solid #b6cdb9; border-radius: 9px; background: #e3efe5; color: #20573f; font-size: 20px; font-weight: 800; }
+    .architecture-rule span { display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; background: #27654b; color: white; font-size: 17px; }
+
+    /* === VIEWER CONTROLS === */
+    .deck-controls { display: flex; align-items: center; gap: 13px; padding: 8px 12px; border: 1px solid #aab9ab; border-radius: 999px; background: #fbfdf9ee; box-shadow: 0 8px 26px #263c2a24; color: var(--ink); }
+    .deck-controls button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; color: var(--accent-dark); background: transparent; font-size: 23px; cursor: pointer; }
+    .deck-controls button:hover { background: var(--accent-soft); }
+    .deck-controls button:disabled { opacity: .3; cursor: default; }
+    .deck-controls output { min-width: 58px; color: var(--muted); font-size: 14px; font-weight: 800; text-align: center; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  </style>
+</head>
+<body>
+  <div class="deck-viewport">
+    <main class="deck-stage" id="deckStage" aria-label="Office Service Desk RAG 三頁簡報">
+      <!-- === 01 COVER === -->
+      <section class="slide cover active visible" aria-label="封面">
+        <div class="slide-inner cover-inner">
+          <div class="cover-copy">
+            <div class="eyebrow reveal">PROJECT SHOWCASE / 2026</div>
+            <h1 class="reveal">Office Service<br><span>Desk RAG</span></h1>
+            <p class="cover-lead reveal">讓同事先排查常見 IT 問題，再用同一個入口通報與追蹤。</p>
+            <div class="cover-tags reveal"><span>AI 知識問答</span><span>報修單管理</span><span>員工自助服務</span></div>
+          </div>
+          <div class="mockup reveal" aria-hidden="true">
+            <div class="mock-head"><i class="round"></i><i class="round"></i><i class="round"></i>IT 故障排查與回報中心</div>
+            <div class="mock-label">排查對話</div>
+            <div class="bubble user">VPN 無法連線，該怎麼處理？</div>
+            <div class="bubble ai"><strong>AI 助理回答</strong>先確認網路是否正常，再重新開啟 VPN。如果仍無法連線，記下錯誤訊息並建立報修單。<div class="mock-source">參考來源：VPN 故障排查知識文件</div></div>
+            <div class="mock-action"><span>問題還沒排除？</span><b>建立報修單</b></div>
+          </div>
+          <div class="footline"><span>小型企業 IT 自助服務平台</span><span class="slide-no">01 / 04</span></div>
+        </div>
+      </section>
+
+      <!-- === 02 NEED AND SOLUTION === -->
+      <section class="slide" aria-label="需求與解決問題">
+        <div class="slide-inner">
+          <div class="topline"><div class="project-mark"><i class="mark-icon"></i><span>OFFICE SERVICE DESK RAG</span></div><span>WHY THIS PROJECT</span></div>
+          <div class="eyebrow reveal" style="margin-top:53px">02 / 需求與解法</div>
+          <h2 class="slide-title reveal">IT 人手有限，先讓同事有方法可試</h2>
+          <p class="slide-deck reveal">把簡單問題的初步排查與後續報修，放進同一個自助服務入口。</p>
+          <div class="problem-layout reveal">
+            <div class="problem-panel">
+              <span class="panel-small">小公司的現場需求</span>
+              <div class="problem-quote">每個小問題都等 IT，<br>容易讓處理排隊。</div>
+              <div class="problem-list">
+                <div><b>01</b> 同事不知道先檢查什麼</div>
+                <div><b>02</b> 需要協助時，問題描述不完整</div>
+                <div><b>03</b> 報修後，不容易掌握進度</div>
+              </div>
+            </div>
+            <div class="solution-panel">
+              <span class="panel-small" style="color:var(--accent-dark)">平台提供的解法</span>
+              <div class="solution-list">
+                <div class="solution-step"><div class="solution-num">1</div><div><h3>先問 AI，取得排查步驟</h3><p>從內部知識文件檢索，回答並標示參考來源。</p></div></div>
+                <div class="solution-step"><div class="solution-num">2</div><div><h3>未解決，再建立報修單</h3><p>帶入剛才描述的問題，補上姓名與問題類別。</p></div></div>
+                <div class="solution-step"><div class="solution-num">3</div><div><h3>用單號查詢處理狀態</h3><p>狀態以報修服務回傳資料為準，方便後續追蹤。</p></div></div>
+              </div>
+              <div class="solution-outcome">目標：讓同事先處理簡單問題，IT 集中處理需要介入的案件。</div>
+            </div>
+          </div>
+          <div class="footline"><span>問題背景 → 產品設計</span><span class="slide-no">02 / 04</span></div>
+        </div>
+      </section>
+
+      <!-- === 03 USER FLOW AND API === -->
+      <section class="slide" aria-label="使用者流程與 API 端點">
+        <div class="slide-inner">
+          <div class="topline"><div class="project-mark"><i class="mark-icon"></i><span>OFFICE SERVICE DESK RAG</span></div><span>USER FLOW & API</span></div>
+          <div class="eyebrow reveal" style="margin-top:38px">03 / 使用者流程與 API</div>
+          <h2 class="slide-title reveal" style="font-size:57px">從提問到追蹤，前端串起兩組 API</h2>
+          <div class="flow-wrap reveal">
+            <div class="flow-heading">使用者流程</div>
+            <div class="flow-row">
+              <div class="flow-node"><strong>提出問題</strong><span>描述遇到的狀況</span></div><div class="flow-arrow">→</div>
+              <div class="flow-node"><strong>AI 初步排查</strong><span>依知識文件給建議</span></div><div class="flow-arrow">→</div>
+              <div class="flow-node"><strong>未解決就報修</strong><span>填資料並取得單號</span></div><div class="flow-arrow">→</div>
+              <div class="flow-node"><strong>查詢處理進度</strong><span>用單號確認狀態</span></div>
+            </div>
+            <div class="flow-branch">若問題已排除，流程在 AI 建議後結束。</div>
+          </div>
+          <div class="api-wrap reveal">
+            <div class="api-card chat">
+              <div class="api-head"><h3>AI 問答 API</h3><span>helpdesk-ai · 8080</span></div>
+              <div class="api-row"><span class="method">POST</span><div class="endpoint">/api/chat<small>向 AI 提問並取得建議</small></div></div>
+              <div class="api-note"><strong>這組 API 做什麼？</strong>接收同事的問題，回傳排查建議與知識來源；查報修狀態時可透過 MCP 取得資料。</div>
+            </div>
+            <div class="api-card tickets">
+              <div class="api-head"><h3>報修單 API</h3><span>mcp-ticket-server · 8081</span></div>
+              <div class="api-row"><span class="method">POST</span><div class="endpoint">/api/tickets<small>建立新報修單</small></div></div>
+              <div class="api-row"><span class="method get">GET</span><div class="endpoint">/api/tickets&nbsp;&nbsp;·&nbsp;&nbsp;/api/tickets/{ticketId}<small>列出全部或查單筆</small></div></div>
+              <div class="api-row"><span class="method put">PUT</span><div class="endpoint">/api/tickets/{ticketId}<small>更新報修內容與狀態</small></div></div>
+              <div class="api-row"><span class="method delete">DELETE</span><div class="endpoint">/api/tickets/{ticketId}<small>刪除指定報修單</small></div></div>
+            </div>
+          </div>
+          <div class="footline"><span>端點與方法依目前專案程式碼整理</span><span class="slide-no">03 / 04</span></div>
+        </div>
+      </section>
+
+      <!-- === 04 RAG AND MCP === -->
+      <section class="slide" aria-label="RAG 與 MCP 在專案中的運作">
+        <div class="slide-inner">
+          <div class="topline"><div class="project-mark"><i class="mark-icon"></i><span>OFFICE SERVICE DESK RAG</span></div><span>HOW IT WORKS</span></div>
+          <div class="eyebrow reveal" style="margin-top:38px">04 / RAG 與 MCP</div>
+          <h2 class="slide-title reveal" style="font-size:58px">一條路找知識，一條路查即時工單</h2>
+          <p class="architecture-intro reveal">RAG 讓回答有文件依據；MCP 讓 AI 呼叫獨立報修服務的工具。</p>
+          <div class="architecture-grid reveal">
+            <div class="architecture-card rag">
+              <div class="architecture-head"><span class="architecture-acronym">RAG</span><div><h3>用知識文件回答排查問題</h3><p>檢索增強生成：先找資料，再組織回答。</p></div></div>
+              <div class="architecture-steps">
+                <div class="architecture-step"><b>01 · 準備知識</b><strong>載入內部 TXT 文件</strong><span>啟動時切成約 300 token 的片段</span></div>
+                <div class="architecture-step"><b>02 · 建立索引</b><strong>轉成向量</strong><span>ONNX 嵌入模型＋記憶體向量庫</span></div>
+                <div class="architecture-step"><b>03 · 收到提問</b><strong>找相近片段</strong><span>用相似度搜尋相關文件內容</span></div>
+                <div class="architecture-step"><b>04 · 產生回答</b><strong>Gemini 整理步驟</strong><span>只依取回的文件作答並列來源</span></div>
+              </div>
+              <div class="architecture-result">輸出：排查建議＋引用的知識文件</div>
+            </div>
+            <div class="architecture-card mcp">
+              <div class="architecture-head"><span class="architecture-acronym">MCP</span><div><h3>讓 AI 使用報修工具</h3><p>模型上下文協定：用統一方式呼叫工具。</p></div></div>
+              <div class="mcp-route"><span>AI 應用</span><i>→</i><span>MCP Server</span><i>→</i><span>MySQL</span></div>
+              <div class="mcp-tool-heading">目前提供的 5 個工具</div>
+              <div class="mcp-tools">
+                <div class="mcp-tool"><code>getTicketStatus</code><span>依單號查詢狀態</span></div>
+                <div class="mcp-tool"><code>createTicket</code><span>建立報修單</span></div>
+                <div class="mcp-tool"><code>updateTicketStatus</code><span>更新處理狀態</span></div>
+                <div class="mcp-tool"><code>updateTicketIssue</code><span>修改問題描述</span></div>
+                <div class="mcp-tool"><code>updateTicketRequesterName</code><span>修改報修人名稱</span></div>
+              </div>
+              <div class="mcp-tool-note">建單與更新只在使用者明確要求時執行。</div>
+            </div>
+          </div>
+          <div class="architecture-rule reveal"><span>✓</span>資料界線：排查建議依知識文件；報修狀態以 MCP 查得的 MySQL 資料為準。</div>
+          <div class="footline"><span>依目前專案的 Spring AI、MCP 與 MySQL 實作整理</span><span class="slide-no">04 / 04</span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="deck-controls" aria-label="投影片控制">
+    <button id="prev" type="button" aria-label="上一頁">‹</button>
+    <output id="counter" aria-live="polite">1 / 4</output>
+    <button id="next" type="button" aria-label="下一頁">›</button>
+  </nav>
+  <div class="sr-only">使用左右方向鍵、空白鍵、滑鼠滾輪或觸控滑動換頁。</div>
+  <script>
+    /* === FIXED-STAGE SCALING AND SLIDE NAVIGATION === */
+    class SlidePresentation {
+      constructor() {
+        this.stage = document.getElementById('deckStage');
+        this.slides = [...document.querySelectorAll('.slide')];
+        this.currentSlide = 0;
+        this.prev = document.getElementById('prev');
+        this.next = document.getElementById('next');
+        this.counter = document.getElementById('counter');
+        this.wheelLocked = false;
+        this.touchX = null;
+        this.scale();
+        window.addEventListener('resize', () => this.scale());
+        this.prev.addEventListener('click', () => this.show(this.currentSlide - 1));
+        this.next.addEventListener('click', () => this.show(this.currentSlide + 1));
+        document.addEventListener('keydown', (event) => {
+          if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); this.show(this.currentSlide + 1); }
+          if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) { event.preventDefault(); this.show(this.currentSlide - 1); }
+          if (event.key === 'Home') this.show(0);
+          if (event.key === 'End') this.show(this.slides.length - 1);
+        });
+        document.addEventListener('wheel', (event) => {
+          if (this.wheelLocked || Math.abs(event.deltaY) < 18) return;
+          this.wheelLocked = true;
+          this.show(this.currentSlide + (event.deltaY > 0 ? 1 : -1));
+          setTimeout(() => { this.wheelLocked = false; }, 480);
+        }, { passive: true });
+        document.addEventListener('touchstart', (event) => { this.touchX = event.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', (event) => {
+          if (this.touchX === null) return;
+          const delta = event.changedTouches[0].screenX - this.touchX;
+          if (Math.abs(delta) > 45) this.show(this.currentSlide + (delta < 0 ? 1 : -1));
+          this.touchX = null;
+        }, { passive: true });
+        this.show(0);
+      }
+      scale() {
+        const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        const x = (window.innerWidth - 1920 * factor) / 2;
+        const y = (window.innerHeight - 1080 * factor) / 2;
+        this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+      }
+      show(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+          const active = i === this.currentSlide;
+          slide.classList.toggle('active', active);
+          slide.classList.toggle('visible', active);
+          slide.setAttribute('aria-hidden', String(!active));
+        });
+        this.counter.textContent = `${this.currentSlide + 1} / ${this.slides.length}`;
+        this.prev.disabled = this.currentSlide === 0;
+        this.next.disabled = this.currentSlide === this.slides.length - 1;
+      }
+    }
+    new SlidePresentation();
+  </script>
+</body>
+</html>
